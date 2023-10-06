@@ -1,0 +1,9 @@
+# Ignore certificate files
+*.crt
+*.key
+
+# Ignore binary files
+truffleproxy
+
+# Ignore excluded domains.txt
+excludedomains.txt
