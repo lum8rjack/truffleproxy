@@ -37,7 +37,7 @@ var CertCmd = &cobra.Command{
 }
 
 func init() {
-	CertCmd.Flags().StringVarP(&outdir, "out", "o", ".", "Output directory to save the private key and certificate file (default current directory)")
+	CertCmd.Flags().StringVarP(&outdir, "out", "o", ".", "Output directory to save the private key and certificate file")
 }
 
 func start() {

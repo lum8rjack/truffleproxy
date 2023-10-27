@@ -44,7 +44,7 @@ func ScanResponse(url string, body []byte, verify bool) (ScanResult, error) {
 	}
 
 	// Loop through all the scanners
-	ctx, cancel := context.WithTimeout(context.Background(), time.Hour*2)
+	ctx, cancel := context.WithTimeout(context.Background(), time.Minute*5)
 	var cancelOnce sync.Once
 	defer cancelOnce.Do(cancel)
 	for name, scanner := range selectedScanners {

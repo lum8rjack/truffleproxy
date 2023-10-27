@@ -7,7 +7,6 @@ import (
 	"bufio"
 	"crypto/tls"
 	"crypto/x509"
-	"fmt"
 	"log"
 	"net/http"
 	"net/http/httputil"
@@ -26,7 +25,7 @@ var (
 	exclude      string
 	logfile      string
 	onlyverified bool
-	port         int
+	address      string
 	scanners     string
 	verbose      bool
 	verify       bool
@@ -45,14 +44,14 @@ var ProxyCmd = &cobra.Command{
 
 func init() {
 	ProxyCmd.Flags().StringVarP(&cert, "cert", "c", "truffleproxy.crt", "Certificate file to use")
-	ProxyCmd.Flags().StringVarP(&exclude, "exclude", "e", "", "File containing domains to exclude")
+	ProxyCmd.Flags().StringVarP(&exclude, "exclude", "e", "", "File containing domains to exclude (default none)")
 	ProxyCmd.Flags().StringVarP(&key, "key", "k", "truffleproxy.key", "Key file to use")
-	ProxyCmd.Flags().StringVarP(&logfile, "logfile", "l", "", "Log file to write to (default: none)")
-	ProxyCmd.Flags().BoolVarP(&onlyverified, "only-verified", "o", false, "Only output secrets that were verified")
-	ProxyCmd.Flags().IntVarP(&port, "port", "p", 9090, "Proxy port to listen on")
+	ProxyCmd.Flags().StringVarP(&logfile, "logfile", "l", "", "Log file to write to (default none)")
+	ProxyCmd.Flags().BoolVarP(&onlyverified, "only-verified", "o", false, "Only output secrets that were verified (default false)")
+	ProxyCmd.Flags().StringVarP(&address, "address", "a", "127.0.0.1:9090", "Proxy address to listen on")
 	ProxyCmd.Flags().StringVarP(&scanners, "scanners", "s", "", "Specify the scanners to use in a comma separated list (default all)")
-	ProxyCmd.Flags().BoolVarP(&verbose, "verbose", "b", false, "Output all URLs that are being scanned not just ones identified as having secrets")
-	ProxyCmd.Flags().BoolVarP(&verify, "verify", "v", false, "Verified identified secrets")
+	ProxyCmd.Flags().BoolVarP(&verbose, "verbose", "b", false, "Output all URLs that are being scanned not just ones identified as having secrets (default false)")
+	ProxyCmd.Flags().BoolVarP(&verify, "verify", "v", false, "Verified identified secrets (default false)")
 }
 
 func start() {
@@ -106,9 +105,8 @@ func start() {
 	tlog.Info("verbose output", zap.Bool("verbose", verbose))
 
 	// Start the proxy
-	serverAddress := fmt.Sprintf(":%d", port)
-	tlog.Info("starting proxy server", zap.String("address", serverAddress))
-	tlog.Fatal("stopped truffleproxy", zap.Error(http.ListenAndServe(serverAddress, proxy)))
+	tlog.Info("starting proxy server", zap.String("address", address))
+	tlog.Fatal("stopped truffleproxy", zap.Error(http.ListenAndServe(address, proxy)))
 	tlog.Info("stopping truffleproxy")
 }
 
@@ -172,15 +170,15 @@ func setupProxy(certFile []byte, keyFile []byte, exclude string, tlog *zap.Logge
 	/*
 		We only need to parse the responses and we only want web related content (exclude pdf, binary, etc.)
 
-		var IsWebRelatedText goproxy.RespCondition = goproxy.ContentTypeIs("text/html",
-		"text/css",
-		"text/javascript", "application/javascript",
-		"text/xml",
-		"text/json")
-
-		Also added "text/plain" for text files, markdown, etc.
+		var IsWebRelatedText goproxy.RespCondition = goproxy.ContentTypeIs(
+			"text/html",
+			"text/css",
+			"text/javascript", "application/javascript",
+			"text/xml",
+			"text/json"
+		)
 	*/
-	tproxy.OnResponse(goproxy.ContentTypeIs("text/css", "text/javascript", "application/javascript", "text/xml", "text/json", "text/plain")).DoFunc(func(resp *http.Response, ctx *goproxy.ProxyCtx) *http.Response {
+	tproxy.OnResponse(goproxy.ContentTypeIs("text/html", "text/css", "text/javascript", "application/javascript", "text/xml", "text/json", "text/plain")).DoFunc(func(resp *http.Response, ctx *goproxy.ProxyCtx) *http.Response {
 		// Check if we should exclude this domain
 		if excludeDomain(ctx.Req.Host) {
 			return resp

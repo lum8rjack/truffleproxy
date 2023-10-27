@@ -38,10 +38,10 @@ var ScanCmd = &cobra.Command{
 
 func init() {
 	useragent = fmt.Sprintf("truffleproxy-%s", version.VERSION)
-	ScanCmd.Flags().StringVarP(&url, "url", "u", "", "URL to scan")
+	ScanCmd.Flags().StringVarP(&url, "url", "u", "", "URL to scan (required)")
 	ScanCmd.Flags().StringVarP(&url, "useragent", "a", useragent, "User-agent to use when sending the request")
 	ScanCmd.Flags().StringVarP(&scanners, "scanners", "s", "", "Specify the scanners to use in a comma separated list (default all)")
-	ScanCmd.Flags().BoolVarP(&verify, "verify", "v", false, "Verified identified secrets")
+	ScanCmd.Flags().BoolVarP(&verify, "verify", "v", false, "Verified identified secrets (default false)")
 }
 
 func start() {

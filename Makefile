@@ -1,12 +1,12 @@
 NAME=truffleproxy
-BUILD=go build -ldflags "-s -w" -trimpath
+BUILD=CGO_ENABLED=0 go build -ldflags "-s -w" -trimpath
 
 default:
 	@ echo "Compiling"
 	$(BUILD) -o $(NAME)
 
 clean:
-	@ echo "Removing binaries"
+	@ echo "Removing binaries and certificate files"
 	rm -f $(NAME)*
 
 linux:
