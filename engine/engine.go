@@ -12,7 +12,7 @@ import (
 	"time"
 
 	"github.com/trufflesecurity/trufflehog/v3/pkg/detectors"
-	"github.com/trufflesecurity/trufflehog/v3/pkg/engine"
+	engine "github.com/trufflesecurity/trufflehog/v3/pkg/engine/defaults"
 )
 
 var (
